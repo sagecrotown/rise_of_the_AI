@@ -1,3 +1,3 @@
-# Munar Mander
+# Rise of the AI
 
-Lunar Lander clone, now on Mars.
+You're just a guy, and everyone wants you
