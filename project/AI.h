@@ -25,6 +25,8 @@ private:
    
     AIType     m_ai_type;
     AIState    m_ai_state;
+    bool       moving_right;
+    bool       moving_up;
 
 public:
 
@@ -36,8 +38,9 @@ public:
     void update(float delta_time, Entity *player, int collidable_entity_count, Map *map);
     
     void ai_activate(Entity *player);
-    void ai_walk();
+    void ai_walk(int left_bound, int right_bound);
     void ai_guard(Entity *player);
+    void ai_fly(int lower_bound, int upper_bound);
     
     // TODO: break into two enums: color and state/direction. should be able to specify type, and from type have several animation frame sets to work with.
     void look_blue() { m_animation_indices = m_frames[BLUE]; }

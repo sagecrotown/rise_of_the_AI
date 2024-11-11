@@ -87,7 +87,7 @@ void soft_restart()
     g_view_matrix = glm::mat4(1.0f);
 //    g_projection_matrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
     left_edge = 10.0f;
-    bottom_edge = -10.0f;
+    bottom_edge = -20.0f;
     
     g_projection_matrix = glm::ortho(-10.0f, 10.0f, -7.5f, 7.5f, -1.0f, 1.0f);
     

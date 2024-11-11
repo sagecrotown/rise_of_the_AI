@@ -1,14 +1,14 @@
 #include "LevelA.h"
 #include "Utility.h"
 
-#define LEVEL_WIDTH 30
-#define LEVEL_HEIGHT 20
+#define LEVEL_WIDTH 60
+#define LEVEL_HEIGHT 30
 
-constexpr char SPRITESHEET_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/files/assets/skel.png",
-           ENEMY_FILEPATH[]       = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/files/assets/aiiiii.png",
-            MAP_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/files/assets/ai_tile.png",
-          FONT_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/files/assets/blue_font.png",
-            CSV_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/files/assets/ai_map.csv";
+constexpr char SPRITESHEET_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/project/assets/skel.png",
+           ENEMY_FILEPATH[]       = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/project/assets/aiiiii.png",
+            MAP_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/project/assets/ai_tile.png",
+          FONT_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/project/assets/blue_font.png",
+            CSV_FILEPATH[] = "/Users/Sage/Downloads/Game Programming/rise_of_the_AI/project/assets/ai_map.csv";
 
 unsigned int LEVELA_DATA[LEVEL_WIDTH * LEVEL_HEIGHT];
 
@@ -95,9 +95,6 @@ void LevelA::initialise(ShaderProgram *program) {
                                           BLUE,                      // AI type
                                           IDLE)                     // AI state
                                        );
-        
-        
-        m_game_state.enemies[i]->set_position(glm::vec3(10.0f + i, 0.0f - i, 0.0f));
         m_game_state.enemies[i]->set_movement(glm::vec3(0.0f));
         m_game_state.enemies[i]->set_acceleration(glm::vec3(0.0f, -9.81f, 0.0f));
     }
@@ -108,6 +105,12 @@ void LevelA::initialise(ShaderProgram *program) {
             aiPtr->set_ai_type(static_cast<AIType>(i));
         }
     }
+    
+    m_game_state.enemies[0]->set_position(glm::vec3(15.0f, -12.0f, 0.0f));
+    m_game_state.enemies[1]->set_position(glm::vec3(15.0f, -12.0f, 0.0f));
+    m_game_state.enemies[2]->set_position(glm::vec3(29.0f, -10.0f, 0.0f));
+    m_game_state.enemies[3]->set_position(glm::vec3(30.0f, -20.0f, 0.0f));
+    m_game_state.enemies[4]->set_position(glm::vec3(6.0f, -18.0f, 0.0f));
 
     /**
      BGM and SFX

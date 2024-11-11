@@ -46,7 +46,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		08EBC2B62CA4902F00D545CE /* files */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (08EBC5F52CA49BF700D545CE /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (shaders, ); path = files; sourceTree = "<group>"; };
+		08EBC2B62CA4902F00D545CE /* project */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (08EBC5F52CA49BF700D545CE /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (shaders, ); path = project; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +70,7 @@
 			children = (
 				08EBC5F82CA49E9A00D545CE /* rise_of_the_ai */,
 				08EBC5D52CA4998B00D545CE /* Frameworks */,
-				08EBC2B62CA4902F00D545CE /* files */,
+				08EBC2B62CA4902F00D545CE /* project */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,7 +102,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				08EBC2B62CA4902F00D545CE /* files */,
+				08EBC2B62CA4902F00D545CE /* project */,
 			);
 			name = rise_of_the_ai;
 			packageProductDependencies = (

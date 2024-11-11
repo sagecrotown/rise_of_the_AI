@@ -1,18 +1,4 @@
-//#define GL_SILENCE_DEPRECATION
-//#define STB_IMAGE_IMPLEMENTATION
-//
-//#ifdef _WINDOWS
-//#include <GL/glew.h>
-//#endif
-//
-//#define GL_GLEXT_PROTOTYPES 1
-//#include <SDL.h>
-//#include <SDL_opengl.h>
-//#include "glm/mat4x4.hpp"
-//#include "glm/gtc/matrix_transform.hpp"
-//#include "ShaderProgram.h"
 #include "AI.h"
-//#include <cmath>
 
 // Default constructor
 AI::AI() : Entity::Entity(), m_ai_type(BLUE), m_ai_state(IDLE) {}  // Call Entity constructor
@@ -38,20 +24,17 @@ void AI::update(float delta_time, Entity *player, int collidable_entity_count, M
     
     if (m_animation_indices.size() != 0)
     {
-        if (glm::length(m_movement) != 0)
+        m_animation_time += delta_time;
+        float seconds_per_frame = (float) 1 / FRAMES_PER_SECOND;
+        
+        if (m_animation_time >= seconds_per_frame)
         {
-            m_animation_time += delta_time;
-            float seconds_per_frame = (float) 1 / FRAMES_PER_SECOND;
+            m_animation_time = 0.0f;
+            m_animation_index++;
             
-            if (m_animation_time >= seconds_per_frame)
+            if (m_animation_index >= m_current_frames)
             {
-                m_animation_time = 0.0f;
-                m_animation_index++;
-                
-                if (m_animation_index >= m_current_frames)
-                {
-                    m_animation_index = 0;
-                }
+                m_animation_index = 0;
             }
         }
     }
@@ -66,7 +49,7 @@ void AI::update(float delta_time, Entity *player, int collidable_entity_count, M
     m_velocity.y += m_acceleration.y * delta_time;
     
     m_velocity.x = m_movement.x * m_speed;
-
+    
     m_position.y += m_velocity.y * delta_time;
     m_position.x += m_velocity.x * delta_time;
     
@@ -84,16 +67,17 @@ void AI::ai_activate(Entity *player) {
             
         case PURPLE:        // purple + green can both walk
             look_purple();
-            ai_walk();
+            ai_guard(player);
             break;
             
         case GREEN:
             look_green();
-            ai_walk();
+            ai_guard(player);
             break;
         
         case PINK:          // pink + yellow + blue are the same
             look_pink();
+            ai_fly(-15, -12);
             break;
             
         case YELLOW:
@@ -102,7 +86,7 @@ void AI::ai_activate(Entity *player) {
             
         case BLUE:
             look_blue();
-            ai_guard(player);
+            ai_walk(6, 23);
             break;
             
         default:
@@ -110,21 +94,59 @@ void AI::ai_activate(Entity *player) {
     }
 }
 
-void AI::ai_walk() {
-    m_movement = glm::vec3(-1.0f, 0.0f, 0.0f);
+void AI::ai_walk(int left_bound, int right_bound) {
+    
+    if (m_position.x > (right_bound)) {
+        moving_right = false;
+    }
+    
+    if (m_position.x < (left_bound)) {
+        moving_right = true;
+    }
+    
+    if (moving_right) {
+        m_movement = glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+    else {
+        m_movement = glm::vec3(-1.0f, 0.0f, 0.0f);
+    }
+}
+
+void AI::ai_fly(int lower_bound, int upper_bound) {
+    if (m_position.y > (upper_bound)) {
+        moving_up = false;
+    }
+    
+    if (m_position.y < (lower_bound)) {
+        moving_up = true;
+    }
+    
+    if (moving_up) {
+        m_movement = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    else {
+        m_movement = glm::vec3(0.0f, -1.0f, 0.0f);
+    }
+    
+    m_velocity.y = m_movement.y * m_speed;
 }
 
 void AI::ai_guard(Entity *player) {
     switch (m_ai_state) {
         case IDLE:
-            if (glm::distance(m_position, player->get_position()) < 3.0f) m_ai_state = WALKING;
+            if (glm::distance(m_position, player->get_position()) < 12.0f) m_ai_state = WALKING;
             break;
             
         case WALKING:
             if (m_position.x > player->get_position().x) {
                 m_movement = glm::vec3(-1.0f, 0.0f, 0.0f);
+                face_left();
             } else {
                 m_movement = glm::vec3(1.0f, 0.0f, 0.0f);
+                face_right();
+            }
+            if (fabs(m_position.x - player->get_position().x) < 0.05f) {
+                face_left();
             }
             break;
             
@@ -138,18 +160,6 @@ void AI::ai_guard(Entity *player) {
 
 void const AI::set_ai_type(AIType new_ai_type) {
     m_ai_type = new_ai_type;
-    switch (new_ai_type) {
-        case BLUE:
-            break;
-        case PINK:
-            break;
-        case YELLOW:
-            break;
-        case GREEN:
-            break;
-        case PURPLE:
-            break;
-    }
 }
 
 void const AI::set_ai_state(AIState new_state) {
