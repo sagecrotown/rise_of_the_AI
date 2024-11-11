@@ -16,8 +16,8 @@
 
 #include "Entity.h"
 
-enum AIType     { BLUE, PINK, YELLOW, GREEN, PURPLE };
-enum AIState    { WALKING, IDLE, TELEPORTING };
+enum AIType     { BLUE, RED, YELLOW, GREEN, PURPLE };
+enum AIState    { WALKING, IDLE, SQUASHED };
 
 class AI : public Entity {
     
@@ -44,7 +44,7 @@ public:
     
     // TODO: break into two enums: color and state/direction. should be able to specify type, and from type have several animation frame sets to work with.
     void look_blue() { m_animation_indices = m_frames[BLUE]; }
-    void look_pink() { m_animation_indices = m_frames[PINK]; }
+    void look_red() { m_animation_indices = m_frames[RED]; }
     void look_yellow() { m_animation_indices = m_frames[YELLOW]; }
     void look_green() { m_animation_indices = m_frames[GREEN]; }
     void look_purple() { m_animation_indices = m_frames[PURPLE + 1]; } // +1 bc green has two animation sets

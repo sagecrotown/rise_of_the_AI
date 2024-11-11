@@ -75,8 +75,8 @@ void AI::ai_activate(Entity *player) {
             ai_guard(player);
             break;
         
-        case PINK:          // pink + yellow + blue are the same
-            look_pink();
+        case RED:          // red + yellow + blue are the same
+            look_red();
             ai_fly(-15, -12);
             break;
             
@@ -150,8 +150,8 @@ void AI::ai_guard(Entity *player) {
             }
             break;
             
-        case TELEPORTING:
-            break;
+//        case SQUASHED:
+//            break;
             
         default:
             break;

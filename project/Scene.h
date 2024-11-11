@@ -24,6 +24,7 @@ struct GameState
     Map *map;
     Entity *player;
     std::vector<Entity*> enemies;
+    std::vector<Entity*> colors;
     
     // ————— AUDIO ————— //
     Mix_Music *bgm;

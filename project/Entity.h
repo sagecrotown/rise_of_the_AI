@@ -7,7 +7,7 @@
 #include <vector>
 //#include "AI.h"
 
-enum EntityType { PLATFORM, PLAYER, ENEMY  };
+enum EntityType { PLATFORM, PLAYER, ENEMY, COLOR  };
 enum AnimationDirection { FORWARD, LEFT, RIGHT };
 
 class Entity {
@@ -18,8 +18,6 @@ protected:
     std::vector<std::vector<int>> m_frames; // vector of vectors containing indices of animation frames
 
     EntityType m_entity_type;
-//    AIType     m_ai_type;
-//    AIState    m_ai_state;
     
     // ————— TRANSFORMATIONS ————— //
     glm::vec3 m_movement;
@@ -110,6 +108,7 @@ public:
     bool      const get_collided_right() const { return m_collided_right; }
     bool      const get_collided_left() const { return m_collided_left; }
     bool      const get_on_triangle() const { return m_on_triangle; }
+    int       const get_animation_index() const { return m_animation_index; }
     
     void activate()   { m_is_active = true;  };
     void deactivate() { m_is_active = false; };

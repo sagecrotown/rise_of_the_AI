@@ -12,6 +12,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Entity.h"
+#include "AI.h"
 #include <cmath>
 
 
@@ -84,7 +85,7 @@ bool const Entity::check_collision(Entity* other) const {
     float x_distance = fabs(m_position.x - other->m_position.x) - ((m_width + other->m_width) / 2.0f);
     float y_distance = fabs(m_position.y - other->m_position.y) - ((m_height + other->m_height) / 2.0f);
 
-    return x_distance < 0.0f && y_distance < 0.0f;
+    return x_distance < 0.0f && y_distance < 0.0f && other->m_is_active;
 }
 
 void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count) {
@@ -94,6 +95,8 @@ void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, i
         if (check_collision(collidable_entity)) {
             float y_distance = fabs(m_position.y - collidable_entity->m_position.y);
             float y_overlap = fabs(y_distance - (m_height / 2.0f) - (collidable_entity->m_height / 2.0f));
+            std::cout << y_overlap << std::endl;
+            std::cout << m_velocity.y << std::endl;
             if (m_velocity.y > 0) {
                 m_position.y   -= y_overlap;
                 m_velocity.y    = 0;
@@ -107,6 +110,10 @@ void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, i
 
                 // Collision!
                 m_collided_bottom  = true;
+                AI* aiPtr = dynamic_cast<AI*>(collidable_entity);     // cast to AI, if possible
+                if (get_entity_type() == PLAYER && aiPtr) {        // if you are player and other is AI
+                    aiPtr->deactivate();
+                }
             }
         }
     }
@@ -120,16 +127,16 @@ void const Entity::check_collision_x(std::vector<Entity*> collidable_entities, i
             float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
             float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
             if (m_velocity.x > 0) {
-                m_position.x     -= x_overlap;
-                m_velocity.x      = 0;
+//                m_position.x     -= x_overlap;
+//                m_velocity.x      = 0;
 
                 // Collision!
                 m_collided_right  = true;
                 
             }
             else if (m_velocity.x < 0) {
-                m_position.x    += x_overlap;
-                m_velocity.x     = 0;
+//                m_position.x    += x_overlap;
+//                m_velocity.x     = 0;
  
                 // Collision!
                 m_collided_left  = true;
@@ -220,6 +227,27 @@ void const Entity::check_collision_x(Map *map) {
 }
 void Entity::update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, Map *map) {
     if (!m_is_active) return;
+    
+    if (get_entity_type() == COLOR) {
+        
+        if (player->get_movement().x < 0) {    // match animation state
+            face_left();
+        }
+        else if (player->get_movement().x > 0) {
+            face_right();
+        }
+        else face_forward();
+        
+        set_position(player->get_position());  // match position
+        set_animation_index(player->get_animation_index());  // make sure indices are lined up
+        
+        m_model_matrix = glm::mat4(1.0f);
+        m_model_matrix = glm::translate(m_model_matrix, m_position);
+        m_model_matrix = glm::rotate(m_model_matrix, m_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+        m_model_matrix = glm::scale(m_model_matrix, m_scale);
+    
+        return;
+    }
  
     m_collided_top    = false;
     m_collided_bottom = false;
@@ -257,8 +285,8 @@ void Entity::update(float delta_time, Entity *player, std::vector<Entity*> colli
     m_position.y += m_velocity.y * delta_time;
     m_position.x += m_velocity.x * delta_time;
     
-    check_collision_y(collidable_entities, collidable_entity_count);
     check_collision_y(map);
+    check_collision_y(collidable_entities, collidable_entity_count);
     
     check_collision_x(collidable_entities, collidable_entity_count);
     check_collision_x(map);
@@ -270,12 +298,13 @@ void Entity::update(float delta_time, Entity *player, std::vector<Entity*> colli
 }
 
 
-void Entity::render(ShaderProgram* program)
-{
+void Entity::render(ShaderProgram* program) {
+    
+    if (!m_is_active) return;
+    
     program->set_model_matrix(m_model_matrix);
 
-    if (m_animation_indices.size() != 0)
-    {
+    if (m_animation_indices.size() != 0) {
         draw_sprite_from_texture_atlas(program, m_texture_id, m_animation_indices[m_animation_index]);
         return;
     }
