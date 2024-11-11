@@ -9,11 +9,13 @@
 #include <SDL_mixer.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <vector>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Util.h"
 #include "Entity.h"
+#include "AI.h"
 #include "Map.h"
 
 struct GameState
@@ -21,7 +23,7 @@ struct GameState
     // ————— GAME OBJECTS ————— //
     Map *map;
     Entity *player;
-    Entity *enemies;
+    std::vector<Entity*> enemies;
     
     // ————— AUDIO ————— //
     Mix_Music *bgm;

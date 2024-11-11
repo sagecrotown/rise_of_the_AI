@@ -5,25 +5,22 @@
 #include "glm/glm.hpp"
 #include "ShaderProgram.h"
 #include <vector>
-#include "AI.h"
+//#include "AI.h"
 
 enum EntityType { PLATFORM, PLAYER, ENEMY  };
-enum AIType     { BLUE, PINK, YELLOW, GREEN, PURPLE };
-enum AIState    { WALKING, IDLE, TELEPORTING };
-
-
 enum AnimationDirection { FORWARD, LEFT, RIGHT };
 
-class Entity
-{
-private:
+class Entity {
+    
+protected:
     bool m_is_active = true;
     
     std::vector<std::vector<int>> m_frames; // vector of vectors containing indices of animation frames
 
     EntityType m_entity_type;
-    AIType     m_ai_type;
-    AIState    m_ai_state;
+//    AIType     m_ai_type;
+//    AIState    m_ai_state;
+    
     // ————— TRANSFORMATIONS ————— //
     glm::vec3 m_movement;
     glm::vec3 m_position;
@@ -66,37 +63,30 @@ public:
     static constexpr int FRAMES_PER_SECOND = 6;
 
     // ————— METHODS ————— //
+    
     Entity();
     Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, std::vector<std::vector<int>> frames, float animation_time, int current_frames, int animation_index, int animation_cols, int animation_rows, float width, float height, EntityType EntityType);
     Entity(GLuint texture_id, float speed, float width, float height, EntityType EntityType); // Simpler constructor
-    Entity(GLuint texture_id, float speed, float width, float height, EntityType EntityType, AIType AIType, AIState AIState); // AI constructor
-    Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, float width, float height, EntityType EntityType, AIType AIType, AIState AIState, std::vector<std::vector<int>> frames, float animation_time, int current_frames, int animation_index, int animation_cols, int animation_rows); // other AI constructor
     ~Entity();
 
     void draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint texture_id, int index);
     bool const check_collision(Entity* other) const;
     
-    void const check_collision_y(Entity* collidable_entities, int collidable_entity_count);
-    void const check_collision_x(Entity* collidable_entities, int collidable_entity_count);
+    void const check_collision_x(std::vector<Entity*> collidable_entities, int collidable_entity_count);
+    void const check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count);
     
     // Overloading our methods to check for only the map
     void const check_collision_y(Map *map);
     void const check_collision_x(Map *map);
     
-    void update(float delta_time, Entity *player, Entity *collidable_entities, int collidable_entity_count, Map *map);
+    virtual void update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, Map *map);
     void render(ShaderProgram* program);
-
-    void ai_activate(Entity *player);
-    void ai_walk();
-    void ai_guard(Entity *player);
     
     void normalise_movement() { m_movement = glm::normalize(m_movement); }
 
-    void face_left() { m_animation_indices = m_frames[LEFT]; }
-    void face_right() { m_animation_indices = m_frames[RIGHT]; }
+    virtual void face_left() { m_animation_indices = m_frames[LEFT]; }
+    virtual void face_right() { m_animation_indices = m_frames[RIGHT]; }
     void face_forward() { m_animation_indices = m_frames[FORWARD]; }
-//    void face_down() { m_animation_indices = m_frames[DOWN]; }
-    
 
     void move_left() { m_movement.x = -1.0f; face_left(); }
     void move_right() { m_movement.x = 1.0f;  face_right(); }
@@ -107,8 +97,6 @@ public:
 
     // ————— GETTERS ————— //
     EntityType const get_entity_type()    const { return m_entity_type;   };
-    AIType     const get_ai_type()        const { return m_ai_type;       };
-    AIState    const get_ai_state()       const { return m_ai_state;      };
     float const get_jumping_power() const { return m_jumping_power; }
     glm::vec3 const get_position()     const { return m_position; }
     glm::vec3 const get_velocity()     const { return m_velocity; }
@@ -125,10 +113,9 @@ public:
     
     void activate()   { m_is_active = true;  };
     void deactivate() { m_is_active = false; };
+    
     // ————— SETTERS ————— //
-    void const set_entity_type(EntityType new_entity_type)  { m_entity_type = new_entity_type;};
-    void const set_ai_type(AIType new_ai_type){ m_ai_type = new_ai_type;};
-    void const set_ai_state(AIState new_state){ m_ai_state = new_state;};
+    void const set_entity_type(EntityType new_entity_type)  { m_entity_type = new_entity_type;}
     void const set_position(glm::vec3 new_position) { m_position = new_position; }
     void const set_velocity(glm::vec3 new_velocity) { m_velocity = new_velocity; }
     void const set_acceleration(glm::vec3 new_acceleration) { m_acceleration = new_acceleration; }

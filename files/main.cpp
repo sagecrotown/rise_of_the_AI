@@ -20,11 +20,6 @@
 #include "Utility.h"
 #include "Scene.h"
 #include "LevelA.h"
-#include "LevelB.h"
-#include "LevelC.h"
-#include "LevelD.h"
-#include "LevelE.h"
-#include "LevelF.h"
 #include "Effects.h"
 
 // ––––– CONSTANTS ––––– //
@@ -56,14 +51,9 @@ enum AppStatus { RUNNING, TERMINATED };
 // ––––– GLOBAL VARIABLES ––––– //
 Scene  *g_current_scene;
 LevelA *g_levelA;
-LevelB *g_levelB;
-LevelC *g_levelC;
-LevelD *g_levelD;
-LevelE *g_levelE;
-LevelF *g_levelF;
 
 //Effects *g_effects;
-Scene   *g_levels[6];
+Scene   *g_levels[1];
 
 SDL_Window* g_display_window;
 
@@ -113,18 +103,8 @@ void soft_restart()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     g_levelA = new LevelA();
-    g_levelB = new LevelB();
-    g_levelC = new LevelC();
-    g_levelD = new LevelD();
-    g_levelE = new LevelE();
-    g_levelF = new LevelF();
     
     g_levels[0] = g_levelA;
-    g_levels[1] = g_levelB;
-    g_levels[2] = g_levelC;
-    g_levels[3] = g_levelD;
-    g_levels[4] = g_levelE;
-    g_levels[5] = g_levelF;
     
     // Start at level A
     switch_to_scene(g_levels[0]);
@@ -158,9 +138,7 @@ void initialise()
 void process_input() {
     // VERY IMPORTANT: If nothing is pressed, we don't want to go anywhere
     g_current_scene->get_state().player->set_movement(glm::vec3(0.0f));
-    if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-        g_current_scene->get_state().player->face_forward();
-    }
+    g_current_scene->get_state().player->face_forward();
     
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -180,29 +158,16 @@ void process_input() {
                         break;
                     
                     case SDLK_r: // restart the game
-                        for (int i = 0; i < 6; i++) {
+                        for (int i = 0; i < 1; i++) {
                             g_levels[i]->set_scene_id(-1);  // reset transitions
                         }
                         initialise(); // reinit
                         break;
                         
                     case SDLK_f:
-                        if (g_current_scene == g_levelB) {
-                            g_current_scene->set_scene_id(2);
-                        }
-                        
-                        if (g_current_scene == g_levelC) {
-               
-                            if (static_cast<int>(delta_time * 100000000) % 5 == 0) {
-                                g_current_scene->fuel_count++;
-                            }
-                        }
                         break;
                         
                     case SDLK_RETURN:
-                        if (g_current_scene == g_levelC) {
-                            g_current_scene->set_scene_id(3);
-                        }
                         break;
                         
                     default:
@@ -215,12 +180,7 @@ void process_input() {
                 }
                 
             default:
-                if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-                    g_current_scene->get_state().player->set_acceleration(glm::vec3(0.0f, -9.81f, 0.0f));
-                }
-                else {
-                    g_current_scene->get_state().player->set_acceleration(glm::vec3(0.0f, 0.0f, 0.0f));
-                }
+                g_current_scene->get_state().player->set_acceleration(glm::vec3(0.0f, -9.81f, 0.0f));
                 break;
         }
     }
@@ -228,45 +188,18 @@ void process_input() {
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
     if (key_state[SDL_SCANCODE_LEFT]) {
-        if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-            g_current_scene->get_state().player->move_left();
-        }
+        g_current_scene->get_state().player->move_left();
     }
     else if (key_state[SDL_SCANCODE_RIGHT])  {
-        if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-            g_current_scene->get_state().player->move_right();
-        }
+        g_current_scene->get_state().player->move_right();
     }
-    
-//    if (key_state[SDL_SCANCODE_SPACE]) {
-//        if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-//            if (g_current_scene == g_levelA || g_current_scene->fuel_count > 0) {
-//                g_current_scene->get_state().player->jump();
-//                g_current_scene->get_state().player->face_forward();
-//                if (g_current_scene == g_levelD) {
-//                    if (static_cast<int>(delta_time * 100000000) % 10 == 0) {
-//                        g_current_scene->fuel_count--;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    else {
-//        if (g_current_scene != g_levelE && g_current_scene != g_levelF) {
-//            g_current_scene->get_state().player->set_acceleration(glm::vec3(0.0f, -3.73f, 0.0f));
-//        }
-//        else {
-//            g_current_scene->get_state().player->set_acceleration(glm::vec3(0.0f, 0.0f, 0.0f));
-//        }
-//    }
          
     if (glm::length( g_current_scene->get_state().player->get_movement()) > 1.0f)
         g_current_scene->get_state().player->normalise_movement();
     
 }
 
-void update()
-{
+void update() {
     float ticks = (float)SDL_GetTicks() / MILLISECONDS_IN_SECOND;
     delta_time = ticks - g_previous_ticks;
     g_previous_ticks = ticks;
@@ -295,25 +228,6 @@ void update()
     // Prevent the camera from showing anything outside of the "edge" of the level
     g_view_matrix = glm::mat4(1.0f);
     
-    // camera follows player left/right and up/down
-//    if (g_current_scene == g_levelD) {
-//        view_left = std::max(g_current_scene->get_state().player->get_position().x, left_edge);
-//        view_bottom = std::max(g_current_scene->get_state().player->get_position().y - 18, bottom_edge);
-//        
-//        g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-view_left, -view_bottom, 0));
-//    }
-//    else if(g_current_scene == g_levelE || g_current_scene == g_levelF) {
-//        view_left = -29.5f;
-//        view_bottom = 22.0f;
-//        g_view_matrix = glm::mat4(1.0f);
-//        g_view_matrix = glm::translate(g_view_matrix, glm::vec3(view_left, view_bottom, 0));
-////                g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-5.0f, 3.75f, 0.0f));
-////                g_view_matrix = glm::translate(g_view_matrix, glm::vec3(0.0f, 0.0f, 0.0f));
-//    }
-//    else {
-//        g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-5, 3.75, 0));
-//    }
-    
     view_left = std::max(g_current_scene->get_state().player->get_position().x, left_edge);
     view_bottom = std::max(g_current_scene->get_state().player->get_position().y, bottom_edge);
     
@@ -339,11 +253,6 @@ void shutdown()
     SDL_Quit();
     
     delete g_levelA;
-    delete g_levelB;
-    delete g_levelC;
-    delete g_levelD;
-    delete g_levelE;
-    delete g_levelF;
 //    delete g_effects;
 }
 
@@ -361,14 +270,6 @@ int main(int argc, char* argv[])
             int curr_fuel = g_current_scene->fuel_count;
             switch_to_scene(g_levels[g_current_scene->get_state().next_scene_id]);
             g_current_scene->fuel_count = curr_fuel;
-//            if (g_current_scene == g_levelD || g_current_scene == g_levelE || g_current_scene == g_levelF) {
-//                g_projection_matrix = glm::ortho(-30.0f, 30.0f, -22.5f, 22.5f, -1.0f, 1.0f);
-//                g_shader_program.set_projection_matrix(g_projection_matrix);
-//            }
-//            else {
-//                g_projection_matrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
-//                g_shader_program.set_projection_matrix(g_projection_matrix);
-//            }
             g_projection_matrix = glm::ortho(-30.0f, 30.0f, -22.5f, 22.5f, -1.0f, 1.0f);
             g_shader_program.set_projection_matrix(g_projection_matrix);
         }

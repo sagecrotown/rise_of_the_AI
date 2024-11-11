@@ -1,153 +1,79 @@
-//#ifndef ENEMY_H
-//#define ENEMY_H
-//
-//#include "Map.h"
-//#include "glm/glm.hpp"
-//#include "ShaderProgram.h"
-//#include <vector>
-//#include "Entity.h"
-//
-//enum AIType     { BLUE, PINK, YELLOW, GREEN, PURPLE };
-//enum AIState    { WALKING, IDLE, TELEPORTING };
-//enum AnimationDirection { FORWARD, LEFT, RIGHT };
-//
-//class AI {
-//private:
-//    bool m_is_active = true;
-//    
-//    std::vector<std::vector<int>> m_frames; // vector of vectors containing indices of animation frames
-//
-//    AIType     m_ai_type;
-//    AIState    m_ai_state;
-//    // ————— TRANSFORMATIONS ————— //
-//    glm::vec3 m_movement;
-//    glm::vec3 m_position;
-//    glm::vec3 m_scale;
-//    glm::vec3 m_velocity;
-//    glm::vec3 m_acceleration;
-//
-//    glm::mat4 m_model_matrix;
-//
-//    float     m_speed,
-//              m_jumping_power,
-//              m_angle = 0;
-//    
-//    bool m_is_jumping;
-//
-//    // ————— TEXTURES ————— //
-//    GLuint    m_texture_id;
-//
-//    // ————— ANIMATION ————— //
-//    int m_animation_cols;
-//    int m_current_frames,
-//        m_animation_index,
-//        m_animation_rows;
-//
-//    std::vector<int> m_animation_indices;
-//    float m_animation_time = 0.0f;
-//
-//    float m_width = 1.0f,
-//          m_height = 1.0f;
-//    
-//    // ————— COLLISIONS ————— //
-//    bool m_collided_top    = false;
-//    bool m_collided_bottom = false;
-//    bool m_collided_left   = false;
-//    bool m_collided_right  = false;
-//    bool m_on_triangle = false;
-//
-//public:
-//    // ————— STATIC VARIABLES ————— //
-//    static constexpr int FRAMES_PER_SECOND = 6;
-//
-//    // ————— METHODS ————— //
-//    AI();
-//    AI(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, std::vector<std::vector<int>> frames, float animation_time, int current_frames, int animation_index, int animation_cols, int animation_rows, float width, float height, EntityType EntityType);
-//    AI(GLuint texture_id, float speed, float width, float height); // Simpler constructor
-//    AI(GLuint texture_id, float speed, float width, float height, AIType AIType, AIState AIState); // AI constructor
-//    ~AI();
-//
-//    void draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint texture_id, int index);
-//    
-//    bool const check_collision(Entity* other) const;
-//    void const check_collision_y(Entity* collidable_entities, int collidable_entity_count);
-//    void const check_collision_x(Entity* collidable_entities, int collidable_entity_count);
-//    
-//    // Overloading our methods to check for only the map
-//    void const check_collision_y(Map *map);
-//    void const check_collision_x(Map *map);
-//    
-//    void update(float delta_time, Entity *player, Entity *collidable_entities, int collidable_entity_count, Map *map);
-//    void render(ShaderProgram* program);
-//
-//    void ai_activate(Entity *player);
-//    void ai_walk();
-//    void ai_guard(Entity *player);
-//    
-//    void normalise_movement() { m_movement = glm::normalize(m_movement); }
-//
-//    void face_left() { m_animation_indices = m_frames[LEFT]; }
-//    void face_right() { m_animation_indices = m_frames[RIGHT]; }
-//    void face_forward() { m_animation_indices = m_frames[FORWARD]; }
-////    void face_down() { m_animation_indices = m_frames[DOWN]; }
-//    
+#define GL_SILENCE_DEPRECATION
+#define STB_IMAGE_IMPLEMENTATION
+
+#ifdef _WINDOWS
+#include <GL/glew.h>
+#endif
+
+#define GL_GLEXT_PROTOTYPES 1
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "ShaderProgram.h"
+
+#include <cmath>
+
+#include "Entity.h"
+
+enum AIType     { BLUE, PINK, YELLOW, GREEN, PURPLE };
+enum AIState    { WALKING, IDLE, TELEPORTING };
+
+class AI : public Entity {
+    
+private:
+   
+    AIType     m_ai_type;
+    AIState    m_ai_state;
+
+public:
+
+    AI();
+    AI(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, std::vector<std::vector<int>> frames, float animation_time, int current_frames, int animation_index, int animation_cols, int animation_rows, float width, float height, EntityType EntityType, AIType AIType, AIState AIState);
+    AI(GLuint texture_id, float speed, float width, float height, EntityType EntityType, AIType AIType, AIState AIState); // AI constructor
+    ~AI();
+
+    void update(float delta_time, Entity *player, int collidable_entity_count, Map *map);
+    
+    void ai_activate(Entity *player);
+    void ai_walk();
+    void ai_guard(Entity *player);
+    
+    // TODO: break into two enums: color and state/direction. should be able to specify type, and from type have several animation frame sets to work with.
+    void look_blue() { m_animation_indices = m_frames[BLUE]; }
+    void look_pink() { m_animation_indices = m_frames[PINK]; }
+    void look_yellow() { m_animation_indices = m_frames[YELLOW]; }
+    void look_green() { m_animation_indices = m_frames[GREEN]; }
+    void look_purple() { m_animation_indices = m_frames[PURPLE + 1]; } // +1 bc green has two animation sets
+    
+    void face_left() {
+        if(get_ai_type() == GREEN) {
+            look_green();
+        }
+        else if (get_ai_type() == PURPLE) {
+            look_purple();
+        }
+    }
+    
+    void face_right() {
+        if(get_ai_type() == GREEN) {
+            m_animation_indices = m_frames[GREEN + 1];
+        }
+        else if (get_ai_type() == PURPLE) {
+            m_animation_indices = m_frames[PURPLE + 2];
+        }
+    }
 //    void move_left() { m_movement.x = -1.0f; face_left(); }
 //    void move_right() { m_movement.x = 1.0f;  face_right(); }
 //    void move_up() { m_movement.y = 1.0f;  face_forward(); }
 //    void move_down() { m_movement.y = -1.0f; face_forward(); }
-//    
-//    void const jump() { m_is_jumping = true;}
-//
-//    // ————— GETTERS ————— //
-//    AIType     const get_ai_type()        const { return m_ai_type; };
-//    AIState    const get_ai_state()       const { return m_ai_state; };
-//    float const get_jumping_power() const { return m_jumping_power; }
-//    glm::vec3 const get_position()     const { return m_position; }
-//    glm::vec3 const get_velocity()     const { return m_velocity; }
-//    glm::vec3 const get_acceleration() const { return m_acceleration; }
-//    glm::vec3 const get_movement()     const { return m_movement; }
-//    glm::vec3 const get_scale()        const { return m_scale; }
-//    GLuint    const get_texture_id()   const { return m_texture_id; }
-//    float     const get_speed()        const { return m_speed; }
-//    bool      const get_collided_top() const { return m_collided_top; }
-//    bool      const get_collided_bottom() const { return m_collided_bottom; }
-//    bool      const get_collided_right() const { return m_collided_right; }
-//    bool      const get_collided_left() const { return m_collided_left; }
-//    bool      const get_on_triangle() const { return m_on_triangle; }
-//    
-//    void activate()   { m_is_active = true;  };
-//    void deactivate() { m_is_active = false; };
-//    
-//    // ————— SETTERS ————— //
-//    void const set_ai_type(AIType new_ai_type){ m_ai_type = new_ai_type;};
-//    void const set_ai_state(AIState new_state){ m_ai_state = new_state;};
-//    void const set_position(glm::vec3 new_position) { m_position = new_position; }
-//    void const set_velocity(glm::vec3 new_velocity) { m_velocity = new_velocity; }
-//    void const set_acceleration(glm::vec3 new_acceleration) { m_acceleration = new_acceleration; }
-//    void const set_movement(glm::vec3 new_movement) { m_movement = new_movement; }
-//    void const set_scale(glm::vec3 new_scale) { m_scale = new_scale; }
-//    void const set_texture_id(GLuint new_texture_id) { m_texture_id = new_texture_id; }
-//    void const set_speed(float new_speed) { m_speed = new_speed; }
-//    void const set_animation_cols(int new_cols) { m_animation_cols = new_cols; }
-//    void const set_animation_rows(int new_rows) { m_animation_rows = new_rows; }
-//    void const set_current_frames(int new_frames) { m_current_frames = new_frames; }
-//    void const set_animation_index(int new_index) { m_animation_index = new_index; }
-//    void const set_animation_time(float new_time) { m_animation_time = new_time; }
-//    void const set_jumping_power(float new_jumping_power) { m_jumping_power = new_jumping_power;}
-//    void const set_width(float new_width) {m_width = new_width; }
-//    void const set_height(float new_height) {m_height = new_height; }
-//    
-//    void const change_angle(float difference) {m_angle = m_angle + difference; }
-//
-//    // Setter for m_frames
-//    void set_frames(std::vector<std::vector<int>> frames) {
-//        for (int i = 0; i < frames.size(); i++) {
-//            for (int j = 0; j < frames[i].size(); j++) {
-//                m_frames[i].push_back(frames[i][j]);
-//            }
-//        }
-//    }
-//};
-//
-//#endif // AI_H
-//
+    
+    // ————— GETTERS ————— //
+    AIType     const get_ai_type()        const { return m_ai_type; };
+    AIState    const get_ai_state()       const { return m_ai_state; };
+    
+    // ————— SETTERS ————— //
+    void const set_ai_type(AIType new_ai_type);
+    void const set_ai_state(AIState new_state);
+};
+
