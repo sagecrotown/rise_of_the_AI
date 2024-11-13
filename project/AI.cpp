@@ -86,7 +86,7 @@ void AI::ai_activate(Entity *player) {
             
         case BLUE:
             look_blue();
-            ai_walk(6, 23);
+            ai_walk(7, 23);
             break;
             
         default:

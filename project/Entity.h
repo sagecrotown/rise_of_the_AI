@@ -71,13 +71,13 @@ public:
     bool const check_collision(Entity* other) const;
     
     void const check_collision_x(std::vector<Entity*> collidable_entities, int collidable_entity_count);
-    void const check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count);
+    void const check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count, std::vector<Entity*> colors);
     
     // Overloading our methods to check for only the map
     void const check_collision_y(Map *map);
     void const check_collision_x(Map *map);
     
-    virtual void update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, Map *map);
+    virtual void update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, std::vector<Entity*> colors, Map *map);
     void render(ShaderProgram* program);
     
     void normalise_movement() { m_movement = glm::normalize(m_movement); }
@@ -109,6 +109,7 @@ public:
     bool      const get_collided_left() const { return m_collided_left; }
     bool      const get_on_triangle() const { return m_on_triangle; }
     int       const get_animation_index() const { return m_animation_index; }
+    bool      const is_active() const { return m_is_active; }
     
     void activate()   { m_is_active = true;  };
     void deactivate() { m_is_active = false; };

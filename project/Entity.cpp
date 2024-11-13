@@ -21,7 +21,7 @@ Entity::Entity()
     : m_position(0.0f), m_movement(0.0f), m_scale(1.0f, 1.0f, 0.0f), m_model_matrix(1.0f),
     m_speed(0.0f), m_animation_cols(0), m_current_frames(0), m_animation_index(0),
     m_animation_rows(0),  m_animation_time(0.0f),
-m_texture_id(0), m_velocity(0.0f), m_acceleration(0.0f), m_width(0.0f), m_height(0.0f), m_frames(FRAMES_PER_SECOND)
+m_texture_id(0), m_velocity(0.0f), m_acceleration(0.0f), m_width(0.0f), m_height(0.0f), m_frames(FRAMES_PER_SECOND), m_is_active(true)
 {
     // Initialize m_frames with zeros or any default value
     for (int i = 0; i < FRAMES_PER_SECOND; ++i) {
@@ -34,7 +34,7 @@ m_texture_id(0), m_velocity(0.0f), m_acceleration(0.0f), m_width(0.0f), m_height
 // Parameterized constructor
 Entity::Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jump_power, std::vector<std::vector<int>> frames, float animation_time, int current_frames, int animation_index, int animation_cols,
     int animation_rows, float width, float height, EntityType EntityType)
-    : m_position(0.0f), m_movement(0.0f), m_scale(1.0f, 1.0f, 0.0f), m_model_matrix(1.0f), m_speed(speed),m_acceleration(acceleration), m_jumping_power(jump_power), m_animation_cols(animation_cols), m_current_frames(current_frames), m_animation_index(animation_index), m_animation_rows(animation_rows), m_animation_time(animation_time), m_texture_id(texture_id), m_velocity(0.0f), m_width(width), m_height(height), m_entity_type(EntityType), m_frames(frames.size(), std::vector<int> (0))
+    : m_position(0.0f), m_movement(0.0f), m_scale(1.0f, 1.0f, 0.0f), m_model_matrix(1.0f), m_speed(speed),m_acceleration(acceleration), m_jumping_power(jump_power), m_animation_cols(animation_cols), m_current_frames(current_frames), m_animation_index(animation_index), m_animation_rows(animation_rows), m_animation_time(animation_time), m_texture_id(texture_id), m_velocity(0.0f), m_width(width), m_height(height), m_entity_type(EntityType), m_frames(frames.size(), std::vector<int> (0)),  m_is_active(true)
 {
     set_frames(frames);
     face_right();
@@ -42,7 +42,7 @@ Entity::Entity(GLuint texture_id, float speed, glm::vec3 acceleration, float jum
 
 // Simpler constructor for partial initialization
 Entity::Entity(GLuint texture_id, float speed,  float width, float height, EntityType EntityType)
-    : m_position(0.0f), m_movement(0.0f), m_scale(1.0f, 1.0f, 0.0f), m_model_matrix(1.0f), m_speed(speed), m_animation_cols(0), m_current_frames(0), m_animation_index(0), m_animation_rows(0), m_animation_time(0.0f), m_texture_id(texture_id), m_velocity(0.0f), m_acceleration(0.0f), m_width(width), m_height(height), m_entity_type(EntityType), m_frames(FRAMES_PER_SECOND, std::vector<int> (FRAMES_PER_SECOND, 0)) {}
+    : m_position(0.0f), m_movement(0.0f), m_scale(1.0f, 1.0f, 0.0f), m_model_matrix(1.0f), m_speed(speed), m_animation_cols(0), m_current_frames(0), m_animation_index(0), m_animation_rows(0), m_animation_time(0.0f), m_texture_id(texture_id), m_velocity(0.0f), m_acceleration(0.0f), m_width(width), m_height(height), m_entity_type(EntityType), m_frames(FRAMES_PER_SECOND, std::vector<int> (FRAMES_PER_SECOND, 0)), m_is_active(true) {}
 
 Entity::~Entity() { }
 
@@ -88,15 +88,15 @@ bool const Entity::check_collision(Entity* other) const {
     return x_distance < 0.0f && y_distance < 0.0f && other->m_is_active;
 }
 
-void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count) {
+void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, int collidable_entity_count, std::vector<Entity*> colors) {
     for (int i = 0; i < collidable_entity_count; i++) {
         Entity *collidable_entity = collidable_entities[i];
         
         if (check_collision(collidable_entity)) {
             float y_distance = fabs(m_position.y - collidable_entity->m_position.y);
             float y_overlap = fabs(y_distance - (m_height / 2.0f) - (collidable_entity->m_height / 2.0f));
-            std::cout << y_overlap << std::endl;
-            std::cout << m_velocity.y << std::endl;
+//            std::cout << y_overlap << std::endl;
+//            std::cout << m_velocity.y << std::endl;
             if (m_velocity.y > 0) {
                 m_position.y   -= y_overlap;
                 m_velocity.y    = 0;
@@ -113,6 +113,7 @@ void const Entity::check_collision_y(std::vector<Entity*> collidable_entities, i
                 AI* aiPtr = dynamic_cast<AI*>(collidable_entity);     // cast to AI, if possible
                 if (get_entity_type() == PLAYER && aiPtr) {        // if you are player and other is AI
                     aiPtr->deactivate();
+                    colors[aiPtr->get_ai_type()]->activate();
                 }
             }
         }
@@ -124,22 +125,27 @@ void const Entity::check_collision_x(std::vector<Entity*> collidable_entities, i
         Entity *collidable_entity = collidable_entities[i];
         
         if (check_collision(collidable_entity)) {
-            float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
-            float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
+//            float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
+//            float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
+            
             if (m_velocity.x > 0) {
 //                m_position.x     -= x_overlap;
 //                m_velocity.x      = 0;
-
-                // Collision!
+                
                 m_collided_right  = true;
+                if (dynamic_cast<AI*>(collidable_entity)) {  // if you crashed into an enemy
+                    deactivate();   // dead
+                }
                 
             }
             else if (m_velocity.x < 0) {
 //                m_position.x    += x_overlap;
 //                m_velocity.x     = 0;
  
-                // Collision!
                 m_collided_left  = true;
+                if (dynamic_cast<AI*>(collidable_entity)) {  // if you crashed into an enemy
+                    deactivate();   // dead
+                }
             }
         }
     }
@@ -225,7 +231,7 @@ void const Entity::check_collision_x(Map *map) {
         m_collided_right = true;
     }
 }
-void Entity::update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, Map *map) {
+void Entity::update(float delta_time, Entity *player, std::vector<Entity*> collidable_entities, int collidable_entity_count, std::vector<Entity*> colors, Map *map) {
     if (!m_is_active) return;
     
     if (get_entity_type() == COLOR) {
@@ -286,7 +292,7 @@ void Entity::update(float delta_time, Entity *player, std::vector<Entity*> colli
     m_position.x += m_velocity.x * delta_time;
     
     check_collision_y(map);
-    check_collision_y(collidable_entities, collidable_entity_count);
+    check_collision_y(collidable_entities, collidable_entity_count, colors);
     
     check_collision_x(collidable_entities, collidable_entity_count);
     check_collision_x(map);

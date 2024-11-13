@@ -25,6 +25,7 @@ struct GameState
     Entity *player;
     std::vector<Entity*> enemies;
     std::vector<Entity*> colors;
+    std::vector<bool> active_colors;
     
     // ————— AUDIO ————— //
     Mix_Music *bgm;
@@ -53,4 +54,6 @@ public:
     int const get_number_of_enemies() const { return m_number_of_enemies; }
     
     void set_scene_id(int id) { m_game_state.next_scene_id = id; }
+    void set_colors(std::vector<bool> new_colors) {m_game_state.active_colors = new_colors; }
+    std::vector<bool> get_colors() { return m_game_state.active_colors; }
 };

@@ -20,6 +20,8 @@
 #include "Utility.h"
 #include "Scene.h"
 #include "LevelA.h"
+#include "LevelB.h"
+#include "LevelC.h"
 #include "Effects.h"
 
 // ––––– CONSTANTS ––––– //
@@ -51,9 +53,11 @@ enum AppStatus { RUNNING, TERMINATED };
 // ––––– GLOBAL VARIABLES ––––– //
 Scene  *g_current_scene;
 LevelA *g_levelA;
+LevelB *g_levelB;
+LevelC *g_levelC;
 
 //Effects *g_effects;
-Scene   *g_levels[1];
+Scene   *g_levels[3];
 
 SDL_Window* g_display_window;
 
@@ -65,6 +69,7 @@ float g_previous_ticks = 0.0f;
 float g_accumulator = 0.0f;
 
 bool g_is_colliding_bottom = false;
+std::vector<bool> preserved_colors;
 
 AppStatus g_app_status = RUNNING;
 
@@ -78,14 +83,29 @@ void shutdown();
 // ––––– GENERAL FUNCTIONS ––––– //
 void switch_to_scene(Scene *scene)
 {
+    if (g_current_scene == g_levelA) preserved_colors = g_levelA->get_colors();
+    if (scene == g_levelC) {
+        g_levelC->set_colors(preserved_colors);
+    }
+    
     g_current_scene = scene;
     g_current_scene->initialise(&g_shader_program);
+    
+    if (g_current_scene == g_levelB || g_current_scene == g_levelC) {
+        g_projection_matrix = glm::ortho(-15.0f, 15.0f, -11.25f, 11.25f, -1.0f, 1.0f);
+        left_edge = 0.0f;
+        bottom_edge = -2.0f;
+    }
+    else {
+        g_projection_matrix = glm::ortho(-10.0f, 10.0f, -7.5f, 7.5f, -1.0f, 1.0f);
+        left_edge = 10.0f;
+    }
+    g_shader_program.set_projection_matrix(g_projection_matrix);
 }
 
 void soft_restart()
 {
     g_view_matrix = glm::mat4(1.0f);
-//    g_projection_matrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
     left_edge = 10.0f;
     bottom_edge = -20.0f;
     
@@ -103,20 +123,29 @@ void soft_restart()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     g_levelA = new LevelA();
+    g_levelB = new LevelB();
+    g_levelC = new LevelC();
     
     g_levels[0] = g_levelA;
+    g_levels[1] = g_levelB;
+    g_levels[2] = g_levelC;
     
     // Start at level A
     switch_to_scene(g_levels[0]);
+//    switch_to_scene(g_levels[1]);
     
 //    g_effects = new Effects(g_projection_matrix, g_view_matrix);
 //    g_effects->start(SHRINK, 2.0f);
+    
+    for (int i = 0; i < g_current_scene->m_game_state.colors.size(); i++) {
+        g_current_scene->m_game_state.colors[i]->deactivate();
+    }
 }
 
 void initialise()
 {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    g_display_window = SDL_CreateWindow("Munar Mander",
+    g_display_window = SDL_CreateWindow("Rise of the AI",
                                       SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                       WINDOW_WIDTH, WINDOW_HEIGHT,
                                       SDL_WINDOW_OPENGL);
@@ -158,10 +187,10 @@ void process_input() {
                         break;
                     
                     case SDLK_r: // restart the game
-                        for (int i = 0; i < 1; i++) {
+                        for (int i = 0; i < 3; i++) {
                             g_levels[i]->set_scene_id(-1);  // reset transitions
                         }
-                        initialise(); // reinit
+                        soft_restart(); // reinit
                         break;
                         
                     case SDLK_f:
@@ -230,6 +259,7 @@ void update() {
     
     view_left = std::max(g_current_scene->get_state().player->get_position().x, left_edge);
     view_bottom = std::max(g_current_scene->get_state().player->get_position().y, bottom_edge);
+    if (g_current_scene == g_levelB) view_bottom = bottom_edge;
     
     g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-view_left, -view_bottom, 0));
 }
@@ -253,6 +283,8 @@ void shutdown()
     SDL_Quit();
     
     delete g_levelA;
+    delete g_levelB;
+    delete g_levelC;
 //    delete g_effects;
 }
 
@@ -270,8 +302,6 @@ int main(int argc, char* argv[])
             int curr_fuel = g_current_scene->fuel_count;
             switch_to_scene(g_levels[g_current_scene->get_state().next_scene_id]);
             g_current_scene->fuel_count = curr_fuel;
-            g_projection_matrix = glm::ortho(-30.0f, 30.0f, -22.5f, 22.5f, -1.0f, 1.0f);
-            g_shader_program.set_projection_matrix(g_projection_matrix);
         }
         
         render();

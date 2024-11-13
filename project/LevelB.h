@@ -1,12 +1,13 @@
 #include "Scene.h"
 
-class LevelA : public Scene {
+class LevelB : public Scene {
 public:
     int ENEMY_COUNT = 5;
-    GLuint A_font_texture_id;
+    GLuint B_font_texture_id;
     glm::vec3 message_pos;
+    glm::vec3 fuel_pos;
     
-    ~LevelA();
+    ~LevelB();
     
     void initialise(ShaderProgram *program) override;
     void update(float delta_time) override;
