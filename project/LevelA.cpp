@@ -68,7 +68,7 @@ void LevelA::initialise(ShaderProgram *program) {
         PLAYER
     );
         
-    m_game_state.player->set_position(glm::vec3(10.0f, 0.0f, 0.0f));
+    m_game_state.player->set_position(glm::vec3(10.0f, -5.0f, 0.0f));
     
     for (int i = 0; i < ENEMY_COUNT; i++) {
         GLuint color_texture_id = Utility::load_texture(COLOR_FILEPATHS[i]);
@@ -139,9 +139,9 @@ void LevelA::initialise(ShaderProgram *program) {
         }
     }
     
-    m_game_state.enemies[0]->set_position(glm::vec3(16.0f, -12.0f, 0.0f));
-    m_game_state.enemies[1]->set_position(glm::vec3(15.0f, -12.0f, 0.0f));
-    m_game_state.enemies[2]->set_position(glm::vec3(29.0f, -10.0f, 0.0f));
+    m_game_state.enemies[0]->set_position(glm::vec3(16.0f, -18.0f, 0.0f));
+    m_game_state.enemies[1]->set_position(glm::vec3(15.0f, -18.0f, 0.0f));
+    m_game_state.enemies[2]->set_position(glm::vec3(45.0f, -10.0f, 0.0f));
     m_game_state.enemies[3]->set_position(glm::vec3(30.0f, -20.0f, 0.0f));
     m_game_state.enemies[4]->set_position(glm::vec3(7.0f, -18.0f, 0.0f));
 

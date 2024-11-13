@@ -125,12 +125,12 @@ void const Entity::check_collision_x(std::vector<Entity*> collidable_entities, i
         Entity *collidable_entity = collidable_entities[i];
         
         if (check_collision(collidable_entity)) {
-//            float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
-//            float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
+            float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
+            float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
             
             if (m_velocity.x > 0 || collidable_entity->get_velocity().x < 0 ) {
-//                m_position.x     -= x_overlap;
-//                m_velocity.x      = 0;
+                m_position.x     -= x_overlap;
+                m_velocity.x      = 0;
                 
                 m_collided_right  = true;
                 if (dynamic_cast<AI*>(collidable_entity)) {  // if you crashed into an enemy
@@ -139,8 +139,8 @@ void const Entity::check_collision_x(std::vector<Entity*> collidable_entities, i
                 
             }
             else if (m_velocity.x < 0 || collidable_entity->get_velocity().x > 0 ) {
-//                m_position.x    += x_overlap;
-//                m_velocity.x     = 0;
+                m_position.x    += x_overlap;
+                m_velocity.x     = 0;
  
                 m_collided_left  = true;
                 if (dynamic_cast<AI*>(collidable_entity)) {  // if you crashed into an enemy

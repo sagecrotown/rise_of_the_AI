@@ -39,9 +39,16 @@ constexpr int VIEWPORT_X = 0,
           VIEWPORT_HEIGHT = WINDOW_HEIGHT;
 
 float left_edge;
+float right_edge;
 float bottom_edge;
+float top_edge;
+
 float view_left;
+float view_right;
 float view_bottom;
+float view_top;
+float view_x;
+float view_y;
 
 constexpr char V_SHADER_PATH[] = "shaders/vertex_textured.glsl",
            F_SHADER_PATH[] = "shaders/fragment_textured.glsl";
@@ -94,7 +101,8 @@ void switch_to_scene(Scene *scene)
     if (g_current_scene == g_levelB || g_current_scene == g_levelC) {
         g_projection_matrix = glm::ortho(-15.0f, 15.0f, -11.25f, 11.25f, -1.0f, 1.0f);
         left_edge = 0.0f;
-        bottom_edge = -2.0f;
+        top_edge = -2.0f;
+        bottom_edge = -3.0f;
     }
     else {
         g_projection_matrix = glm::ortho(-10.0f, 10.0f, -7.5f, 7.5f, -1.0f, 1.0f);
@@ -107,7 +115,9 @@ void soft_restart()
 {
     g_view_matrix = glm::mat4(1.0f);
     left_edge = 10.0f;
-    bottom_edge = -20.0f;
+    bottom_edge = -22.0f;
+    right_edge = 49.5f;
+    top_edge = -7.0f;
     
     g_projection_matrix = glm::ortho(-10.0f, 10.0f, -7.5f, 7.5f, -1.0f, 1.0f);
     
@@ -256,12 +266,31 @@ void update() {
     
     // Prevent the camera from showing anything outside of the "edge" of the level
     g_view_matrix = glm::mat4(1.0f);
+
+
+    float player_x = g_current_scene->get_state().player->get_position().x;
+    float player_y = g_current_scene->get_state().player->get_position().y;
     
-    view_left = std::max(g_current_scene->get_state().player->get_position().x, left_edge);
-    view_bottom = std::max(g_current_scene->get_state().player->get_position().y, bottom_edge);
-    if (g_current_scene == g_levelB) view_bottom = bottom_edge;
+    if (left_edge <= player_x && right_edge >= player_x) view_x = player_x;
+    else if (left_edge > player_x) view_x = left_edge;
+    else view_x = right_edge;
     
-    g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-view_left, -view_bottom, 0));
+    if (top_edge >= player_y && bottom_edge <= player_y) view_y = player_y;
+    else if (top_edge < player_y) view_y = top_edge;
+    else view_y = bottom_edge;
+    
+        std::cout << "player: " << player_x << ", " << player_y << std::endl;
+    
+        std::cout << "left_edge: " << left_edge << std::endl;
+        std::cout << "right_edge: " << right_edge << std::endl;
+        std::cout << "top_edge: " << top_edge << std::endl;
+        std::cout << "bottom_edge: " << bottom_edge << std::endl;
+    
+        std::cout << "view_x: " << view_x << std::endl;
+        std::cout << "view_y: " << view_y << std::endl;
+        std::cout << std::endl;
+    
+    g_view_matrix = glm::translate(g_view_matrix, glm::vec3(-view_x, -view_y, 0));
 }
 
 void render()
